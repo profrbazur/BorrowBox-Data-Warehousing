@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BorrowBox — OLTP to OLAP Visual Demo</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    // Tailwind config — extend dark theme
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              900: '#0f172a',
+              850: '#162032',
+              800: '#1e293b',
+            }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════ -->
+  <aside id="sidebar">
+
+    <!-- Logo / Title -->
+    <div id="sidebar-logo">
+      <div class="logo-icon">📚</div>
+      <div class="logo-title">BorrowBox DW</div>
+      <div class="logo-sub">OLTP → OLAP Demo</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="sidebar-nav">
+
+      <div class="nav-item active" data-section="overview">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Overview</span>
+      </div>
+
+      <div style="padding:6px 12px;margin-top:8px;margin-bottom:2px">
+        <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;color:#334155;font-weight:700">Source</div>
+      </div>
+
+      <div class="nav-item" data-section="oltp">
+        <span class="nav-icon">🗄️</span>
+        <span class="nav-label">OLTP</span>
+        <span class="nav-step-badge">DB</span>
+      </div>
+
+      <div class="nav-item" data-section="olap">
+        <span class="nav-icon">⭐</span>
+        <span class="nav-label">OLAP Design</span>
+        <span class="nav-step-badge">DW</span>
+      </div>
+
+      <div style="padding:6px 12px;margin-top:8px;margin-bottom:2px">
+        <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;color:#334155;font-weight:700">ETL Pipeline</div>
+      </div>
+
+      <div class="nav-item" data-section="extract">
+        <span class="nav-icon">📤</span>
+        <span class="nav-label">Extract</span>
+        <span class="nav-step-badge">E</span>
+      </div>
+
+      <div class="nav-item" data-section="transform">
+        <span class="nav-icon">🔄</span>
+        <span class="nav-label">Transform</span>
+        <span class="nav-step-badge">T</span>
+      </div>
+
+      <div class="nav-item" data-section="load">
+        <span class="nav-icon">📥</span>
+        <span class="nav-label">Load</span>
+        <span class="nav-step-badge">L</span>
+      </div>
+
+      <div style="padding:6px 12px;margin-top:8px;margin-bottom:2px">
+        <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;color:#334155;font-weight:700">Analytics</div>
+      </div>
+
+      <div class="nav-item" data-section="dashboard">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">OLAP Dashboard</span>
+      </div>
+
+    </nav>
+
+    <!-- Progress Bar -->
+    <div id="sidebar-progress">
+      <div class="prog-label">Demo Progress</div>
+      <div id="prog-bar-track">
+        <div id="prog-bar-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ══════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════ -->
+  <main id="main-content">
+
+    <!-- Top Control Bar -->
+    <div id="top-bar">
+      <span id="data-mode-badge" class="demo">○ Demo Data Mode</span>
+      <button id="btn-pause" class="ctrl-btn">⏸ Pause</button>
+      <button id="btn-restart" class="ctrl-btn">↺ Restart</button>
+    </div>
+
+    <!-- Sections Wrapper -->
+    <div id="sections-wrap">
+
+      <!-- ── SECTION 1: OVERVIEW ── -->
+      <section id="sec-overview" class="section active">
+        <!-- Built dynamically by buildOverviewSection() -->
+      </section>
+
+      <!-- ── SECTION 2: OLTP ── -->
+      <section id="sec-oltp" class="section">
+        <!-- Built dynamically by buildOltpSection() -->
+      </section>
+
+      <!-- ── SECTION 3: OLAP ── -->
+      <section id="sec-olap" class="section">
+        <!-- Built dynamically by buildOlapSection() -->
+      </section>
+
+      <!-- ── SECTION 4: EXTRACT ── -->
+      <section id="sec-extract" class="section">
+        <!-- Built dynamically by buildExtractSection() -->
+      </section>
+
+      <!-- ── SECTION 5: TRANSFORM ── -->
+      <section id="sec-transform" class="section">
+        <!-- Built dynamically by buildTransformSection() -->
+      </section>
+
+      <!-- ── SECTION 6: LOAD ── -->
+      <section id="sec-load" class="section">
+        <!-- Built dynamically by buildLoadSection() -->
+      </section>
+
+      <!-- ── SECTION 7: DASHBOARD ── -->
+      <section id="sec-dashboard" class="section">
+        <!-- Built dynamically by buildDashboardSection() -->
+      </section>
+
+    </div><!-- /sections-wrap -->
+
+  </main><!-- /main-content -->
+
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════
+     DRILL-THROUGH MODAL
+═══════════════════════════════════ -->
+<div id="drillthrough-modal" onclick="if(event.target===this)closeDrillthrough()">
+  <div id="drillthrough-box">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div id="dt-title" style="font-size:1.1rem;font-weight:800;color:#e2e8f0">Drill-through</div>
+        <div style="font-size:0.75rem;color:#64748b;margin-top:2px">Sample transaction detail records</div>
+      </div>
+      <button onclick="closeDrillthrough()"
+        style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+               border-radius:6px;color:#94a3b8;padding:6px 12px;cursor:pointer;font-size:0.8rem">
+        ✕ Close
+      </button>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px 12px;font-size:0.68rem;text-transform:uppercase;
+                       letter-spacing:0.08em;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08)">Borrower</th>
+            <th style="text-align:left;padding:8px 12px;font-size:0.68rem;text-transform:uppercase;
+                       letter-spacing:0.08em;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08)">Item</th>
+            <th style="text-align:left;padding:8px 12px;font-size:0.68rem;text-transform:uppercase;
+                       letter-spacing:0.08em;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08)">Date</th>
+            <th style="text-align:left;padding:8px 12px;font-size:0.68rem;text-transform:uppercase;
+                       letter-spacing:0.08em;color:#64748b;border-bottom:1px solid rgba(255,255,255,0.08)">Status</th>
+          </tr>
+        </thead>
+        <tbody id="dt-table-body">
+          <tr><td colspan="4" style="text-align:center;padding:24px;color:#475569">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);
+                font-size:0.7rem;color:#475569;text-align:center">
+      Powered by borrowbox_olap · fact_borrowing joined with dimension tables
+    </div>
+
+  </div>
+</div>
+
+<!-- Main Script -->
+<script src="script.js"></script>
+
+</body>
+</html>
